@@ -1,0 +1,39 @@
+{
+  "timeZone": "Asia/Tokyo",
+  "dependencies": {
+    "libraries": [{
+      "userSymbol": "FUF",
+      "libraryId": "13vsleDIrgJBcTjJyD0pc_vYoFLnVQc3CsQDlKMMHfFtksd74eTtjux9f",
+      "version": "0",
+      "developmentMode": true
+    }]
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "oauthScopes": ["https://www.googleapis.com/auth/drive.readonly", "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/forms.currentonly", "https://www.googleapis.com/auth/forms", "https://www.googleapis.com/auth/script.external_request", "https://www.googleapis.com/auth/gmail.settings.basic", "https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.modify", "https://mail.google.com/", "https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.readonly", "https://www.google.com/calendar/feeds", "https://www.googleapis.com/auth/script.container.ui", "https://www.googleapis.com/auth/documents", "https://www.googleapis.com/auth/presentations"],
+  "runtimeVersion": "V8",
+  "sheets": {
+    "macros": [{
+      "menuName": "newContract",
+      "functionName": "newContract"
+    }, {
+      "menuName": "newContractOrQuotation",
+      "functionName": "newContractOrQuotation"
+    }, {
+      "menuName": "newQuotation",
+      "functionName": "newQuotation"
+    }, {
+      "menuName": "contractPaymentSchedule",
+      "functionName": "contractPaymentSchedule"
+    }, {
+      "menuName": "quotationPaymentSchedule",
+      "functionName": "quotationPaymentSchedule"
+    }, {
+      "menuName": "forcePostToContractDB",
+      "functionName": "forcePostToContractDB",
+      "defaultShortcut": "Ctrl+Alt+Shift+0"
+    }, {
+      "menuName": "receiptAutoCreate",
+      "functionName": "receiptAutoCreate"
+    }]
+  }
+}
