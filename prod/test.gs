@@ -1,0 +1,1 @@
+const env = "prod" //テスト環境であれば "test", 本番環境であれば "prod"
