@@ -37,7 +37,8 @@ const mtgFormatQuestionTitle = "ご希望の面談形式";
 
 //　契約担当者
 const salesPerson = FUF.tanzeelAhmad;
-const salesPerson1 = FUF.nomiReina;
+// 能美さんは退職済みのため、お問合せ通知の宛先から外しました（2026/11/11）
+// const salesPerson1 = FUF.nomiReina;
 
 // #契約書スプレッドシート関連
 // 契約書の情報欄

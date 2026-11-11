@@ -273,21 +273,21 @@ function createCalendarEvent(studentId, studentName, mail, dateTime, meetingForm
 
   if (meetingFormat == "対面") {
     for (var i = 0; i < interviewRooms.length; i++) {
-      if (FUF.isAvailable(startTime, endTime, interviewRooms[i])) {
+      if (safeIsAvailable_(startTime, endTime, interviewRooms[i])) {
         if (attendants != ``) { attendants += `, ` }
         attendants += `${interviewRooms[i]["mail"]}`;
       }
     }
     //　対応可能な契約担当者を列挙する。
     for (var i = 0; i < salesInterviewers.length; i++) {
-      if (FUF.isAvailable(startTime, endTime, salesInterviewers[i])) {
+      if (safeIsAvailable_(startTime, endTime, salesInterviewers[i])) {
         if (attendants != ``) { attendants += `, ` }
         attendants += `${salesInterviewers[i]["mail"]}`;
       }
     }
     //　対応可能な教務担当者を列挙する。
     for (var i = 0; i < onsiteAcademicInterviwers.length; i++) {
-      if (FUF.isAvailable(startTime, endTime, onsiteAcademicInterviwers[i])) {
+      if (safeIsAvailable_(startTime, endTime, onsiteAcademicInterviwers[i])) {
         if (attendants != ``) { attendants += `, ` }
         attendants += `${onsiteAcademicInterviwers[i]["mail"]}`;
       }
@@ -297,21 +297,21 @@ function createCalendarEvent(studentId, studentName, mail, dateTime, meetingForm
 
   if (meetingFormat == "オンライン") {
     for (var i = 0; i < interviewRooms.length; i++) {
-      if (FUF.isAvailable(startTime, endTime, interviewRooms[i])) {
+      if (safeIsAvailable_(startTime, endTime, interviewRooms[i])) {
         if (attendants != ``) { attendants += `, ` }
         attendants += `${interviewRooms[i]["mail"]}`;
       }
     }
     //　対応可能な契約担当者を列挙する。
     for (var i = 0; i < salesInterviewers.length; i++) {
-      if (FUF.isAvailable(startTime, endTime, salesInterviewers[i])) {
+      if (safeIsAvailable_(startTime, endTime, salesInterviewers[i])) {
         if (attendants != ``) { attendants += `, ` }
         attendants += `${salesInterviewers[i]["mail"]}`;
       }
     }
     //　対応可能な教務担当者を列挙する。
     for (var i = 0; i < onlineAcademicInterviewers.length; i++) {
-      if (FUF.isAvailable(startTime, endTime, onlineAcademicInterviewers[i])) {
+      if (safeIsAvailable_(startTime, endTime, onlineAcademicInterviewers[i])) {
         if (attendants != ``) { attendants += `, ` }
         attendants += `${onlineAcademicInterviewers[i]["mail"]}`;
       }
@@ -339,7 +339,7 @@ function chatNotification(e, contractInfoFolderUrl, studentFolderUrl, studentDoc
   var itemResponses = e.response.getItemResponses();
 
   // Googleフォームの質問項目名と回答を順番に変数textへ入れる
-  var text = `<users/${salesPerson["chatId"]}>, <users/${salesPerson1["chatId"]}> \n ${salesPerson["nickname"]}様， ${salesPerson1["nickname"]}様,新規お問合せがありましたよ！！`;
+  var text = `<users/${salesPerson["chatId"]}> \n ${salesPerson["nickname"]}様,新規お問合せがありましたよ！！`;
   for (var i = 0; i < itemResponses.length; i++) {
     var itemResponse = itemResponses[i];
     var question = itemResponse.getItem().getTitle();
@@ -392,28 +392,28 @@ function putAvailableTimesToForm() {
       // 面談室の予定おさえる
       var flags = [];
       for (let i = 0; i < interviewRooms.length; i++) {
-        flags = flags.concat(FUF.isAvailable(start, end, interviewRooms[i]));
+        flags = flags.concat(safeIsAvailable_(start, end, interviewRooms[i]));
       }
       interviewRoomFlags = interviewRoomFlags.concat(flags.some(function (element) { return element === true }))
 
       // 営業担当者の予定おさえる。
       var flags = [];
       for (let i = 0; i < salesInterviewers.length; i++) {
-        flags = flags.concat(FUF.isAvailable(start, end, salesInterviewers[i]));
+        flags = flags.concat(safeIsAvailable_(start, end, salesInterviewers[i]));
       }
       salesInterviewerFlags = salesInterviewerFlags.concat(flags.some(function (element) { return element === true }))
 
       // オンサイトでの面談担当者の予定おさえる。
       var flags = [];
       for (let i = 0; i < onsiteAcademicInterviwers.length; i++) {
-        flags = flags.concat(FUF.isAvailable(start, end, onsiteAcademicInterviwers[i]))
+        flags = flags.concat(safeIsAvailable_(start, end, onsiteAcademicInterviwers[i]))
       }
       onsiteAcademicInterviewerFlags = onsiteAcademicInterviewerFlags.concat(flags.some(function (element) { return element === true }));
 
       // オンラインでの面談担当者の予定押さえる。
       var flags = [];
       for (let i = 0; i < onlineAcademicInterviewers.length; i++) {
-        flags = flags.concat(FUF.isAvailable(start, end, onlineAcademicInterviewers[i]))
+        flags = flags.concat(safeIsAvailable_(start, end, onlineAcademicInterviewers[i]))
       }
       onlineAcademicInterviewerFlags = onlineAcademicInterviewerFlags.concat(flags.some(function (element) { return element === true }));
 
@@ -466,4 +466,38 @@ function refreshFormPulldowns(formId, itemNamesArray, choicesArray) {
       items[i].asListItem().setChoiceValues(choicesArray)
     }
   }
+}
+
+
+// 2026/11/11 追加
+// カレンダーが取得できない担当者（退職・共有解除など）がいても、処理全体が止まらないようにする。
+// 取得できなかった担当者は「空いていない」として扱い、ログに残す（ダブルブッキングを防ぐため）。
+function safeIsAvailable_(start, end, person) {
+  try {
+    return FUF.isAvailable(start, end, person);
+  } catch (err) {
+    var who = (person && (person["nickname"] || person["mail"])) || "不明な担当者";
+    console.warn(`カレンダーを取得できませんでした: ${who} / ${err}`);
+    return false;
+  }
+}
+
+// 2026/11/11 追加
+// 面談の空き確認で使う全員のカレンダーが取得できるかを確認する（手動で実行）。
+function diagnoseInterviewCalendars() {
+  var groups = {
+    "面談室": interviewRooms,
+    "契約担当者": salesInterviewers,
+    "教務担当者（対面）": onsiteAcademicInterviwers,
+    "教務担当者（オンライン）": onlineAcademicInterviewers
+  };
+  Object.keys(groups).forEach(function (label) {
+    groups[label].forEach(function (person) {
+      var mail = person && person["mail"];
+      var cal = mail ? CalendarApp.getCalendarById(mail) : null;
+      console.log(`${label}: ${person && person["nickname"]} (${mail}) → ${cal ? "OK" : "取得できない"}`);
+    });
+  });
+  // ライブラリ側の空き判定の中身（どのキーでカレンダーを開いているか）を確認する
+  console.log(FUF.isAvailable.toString());
 }
